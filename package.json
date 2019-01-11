@@ -1,0 +1,37 @@
+{
+  "name": "fork-ts-checker-async-overlay-webpack-plugin",
+  "version": "0.1.0",
+  "description": "Webpack plugin that connects fork-ts-checker-webpack-plugin (async: true) to error overlay of webpack-dev-server.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ypresto/fork-ts-checker-async-overlay-webpack-plugin.git"
+  },
+  "keywords": [
+    "webpack",
+    "typescript"
+  ],
+  "author": {
+    "name": "Yuya Tanaka",
+    "email": "yuya.presto@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ypresto/fork-ts-checker-async-overlay-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/ypresto/fork-ts-checker-async-overlay-webpack-plugin#readme",
+  "devDependencies": {
+    "@types/node": "^10.12.18",
+    "@types/tapable": "^1.0.4",
+    "@types/webpack": "^4.4.22",
+    "fork-ts-checker-webpack-plugin": "^0.5.2",
+    "typescript": "^3.2.2"
+  },
+  "peerDependencies": {
+    "fork-ts-checker-webpack-plugin": "^0.5.2"
+  }
+}
