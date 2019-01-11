@@ -19,8 +19,8 @@ For convenient, you can concat `thisPlugin.plugins()` to plugins array. Or you c
 Don't forget to remove `async: false` option of fork-ts-checker-webpack-plugin to get speed up with this plugin.
 
 ```js
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const ForkTsCheckerAsyncOverlayWebpackPlugin = require('./fork-ts-checker-async-overlay-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const ForkTsCheckerAsyncOverlayWebpackPlugin = require('fork-ts-checker-async-overlay-webpack-plugin')
 
 module.exports = {
   module: {
@@ -47,7 +47,7 @@ module.exports = {
   ),
   devServer: {
     overlay: true, // important
-    inline: true,
+    inline: true
   }
 }
 ```
