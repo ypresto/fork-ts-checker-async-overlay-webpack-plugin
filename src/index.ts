@@ -77,7 +77,7 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
   }
 
   apply(compiler: webpack.Compiler) {
-    const hooks = compiler.hooks as compilation.CompilerHooks & ForkTsCheckerHooks;
+    const hooks = compiler.hooks as compilation.CompilerHooks & ForkTsCheckerHooks
     // To access plugin hooks and tap into the event, we need to use the getCompilerHooks static method
     const forkTsCheckerHooks = (this.checkerPlugin as ForkTsCheckerWebpackPlugin).constructor.getCompilerHooks(compiler)
 
