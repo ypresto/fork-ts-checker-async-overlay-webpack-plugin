@@ -77,7 +77,9 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
   }
 
   apply(compiler: webpack.Compiler) {
-    const hooks = compiler.hooks as compilation.CompilerHooks & ForkTsCheckerHooks
+    const hooks = compiler.hooks as compilation.CompilerHooks & ForkTsCheckerHooks;
+    // To access plugin hooks and tap into the event, we need to use the getCompilerHooks static method
+    const forkTsCheckerHooks = (this.checkerPlugin as ForkTsCheckerWebpackPlugin).constructor.getCompilerHooks(compiler)
 
     // Steel 'done' hooks of webpack-dev-server.
     hooks.done.intercept({
@@ -111,7 +113,7 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
     })
 
     // Then disable emit taps as they are not called in async mode.
-    hooks.forkTsCheckerEmit.intercept({
+    forkTsCheckerHooks.emit.intercept({
       register: tap => conditionalTap(tap, () => !this.isAsync())
     })
 
@@ -124,7 +126,7 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
 
     // webpack-dev-server shows overlay without reload when error is reported.
     // This will re-send 'done' event after some type check error is found.
-    hooks.forkTsCheckerDone.tap(
+    forkTsCheckerHooks.done.tap(
       NAME,
       (diagnostics, lints, elapsed) => {
         if (!this.isAsync()) return
