@@ -2,3 +2,6 @@ node_modules
 src
 .prettierrc
 tsconfig.json
+sandbox
+*.js.map
+package-lock.json

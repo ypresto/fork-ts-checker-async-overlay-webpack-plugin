@@ -1,26 +1,18 @@
 import webpack, { compilation } from 'webpack'
 import { Tap, AsyncSeriesHook, SyncHook } from 'tapable'
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
-import { NormalizedMessage } from 'fork-ts-checker-webpack-plugin/lib/NormalizedMessage';
+import { NormalizedMessage } from 'fork-ts-checker-webpack-plugin/lib/NormalizedMessage'
+import { ForkTsCheckerHooks } from 'fork-ts-checker-webpack-plugin/lib/hooks'
 
-interface ForkTsCheckerWebpackPluginPrivate {
+interface ForkTsCheckerWebpackPluginPrivate
+  extends Omit<ForkTsCheckerWebpackPlugin, 'async'> {
   async: boolean
   isWatching: boolean
   emitCallback: Function
-  createEmitCallback(compilation: compilation.Compilation, callback: any): Function
-}
-
-interface ForkTsCheckerHooks {
-  forkTsCheckerServiceBeforeStart: AsyncSeriesHook
-
-  forkTsCheckerCancel: SyncHook
-  forkTsCheckerServiceStartError: SyncHook
-  forkTsCheckerWaiting: SyncHook
-  forkTsCheckerServiceStart: SyncHook
-  forkTsCheckerReceive: SyncHook<NormalizedMessage[], NormalizedMessage[]>
-  forkTsCheckerServiceOutOfMemory: SyncHook;
-  forkTsCheckerEmit: SyncHook<NormalizedMessage[], NormalizedMessage[], number>
-  forkTsCheckerDone: SyncHook<NormalizedMessage[], NormalizedMessage[], number>
+  createEmitCallback(
+    compilation: compilation.Compilation,
+    callback: any
+  ): Function
 }
 
 const NAME = 'ForkTsCheckerAsyncOverlayWebpackPlugin'
@@ -48,13 +40,14 @@ function conditionalTap(tap: Tap, condition: () => boolean) {
 }
 
 class ForkTsCheckerAsyncOverlayWebpackPlugin {
-  private checkerPlugin:ForkTsCheckerWebpackPluginPrivate
+  private checkerPlugin: ForkTsCheckerWebpackPluginPrivate
   private interceptedDoneTaps: Tap[] = []
   private isCheckerDone = false
   private lastStats: webpack.Stats | null = null
 
   constructor(options: { checkerPlugin: ForkTsCheckerWebpackPlugin }) {
-    if (!options.checkerPlugin) throw new Error(`Please pass checkerPlugin to ${NAME}.`)
+    if (!options.checkerPlugin)
+      throw new Error(`Please pass checkerPlugin to ${NAME}.`)
     this.checkerPlugin = options.checkerPlugin as any
     this.validateChecker()
   }
@@ -64,7 +57,7 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
   }
 
   private validateChecker() {
-    if (this.checkerPlugin.async) {
+    if (!this.checkerPlugin.async) {
       console.warn(
         NAME +
           ': async option of ForkTsCheckerWebpackPlugin is disabled. This plugin does nothing.'
@@ -77,7 +70,7 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
   }
 
   apply(compiler: webpack.Compiler) {
-    const hooks = compiler.hooks as compilation.CompilerHooks & ForkTsCheckerHooks
+    const hooks = compiler.hooks
 
     // Steel 'done' hooks of webpack-dev-server.
     hooks.done.intercept({
@@ -110,8 +103,14 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
       )
     })
 
+    const forkTsCheckerHooks: Record<ForkTsCheckerHooks, SyncHook> = (this
+      .checkerPlugin
+      .constructor as typeof ForkTsCheckerWebpackPlugin).getCompilerHooks(
+      compiler
+    )
+
     // Then disable emit taps as they are not called in async mode.
-    hooks.forkTsCheckerEmit.intercept({
+    forkTsCheckerHooks.emit.intercept({
       register: tap => conditionalTap(tap, () => !this.isAsync())
     })
 
@@ -124,9 +123,9 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
 
     // webpack-dev-server shows overlay without reload when error is reported.
     // This will re-send 'done' event after some type check error is found.
-    hooks.forkTsCheckerDone.tap(
+    forkTsCheckerHooks.done.tap(
       NAME,
-      (diagnostics, lints, elapsed) => {
+      (diagnostics: any[], lints: any[], _elapsed) => {
         if (!this.isAsync()) return
         if (
           diagnostics.concat(lints).some(message => message.isErrorSeverity())
