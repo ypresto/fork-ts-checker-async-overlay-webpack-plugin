@@ -1,7 +1,7 @@
 import webpack, { compilation } from 'webpack'
-import { Tap, AsyncSeriesHook, SyncHook } from 'tapable'
+import { Tap, SyncHook } from 'tapable'
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
-import { NormalizedMessage } from 'fork-ts-checker-webpack-plugin/lib/NormalizedMessage'
+import { Issue, IssueSeverity } from 'fork-ts-checker-webpack-plugin/lib/issue'
 import { ForkTsCheckerHooks } from 'fork-ts-checker-webpack-plugin/lib/hooks'
 
 interface ForkTsCheckerWebpackPluginPrivate
@@ -125,10 +125,10 @@ class ForkTsCheckerAsyncOverlayWebpackPlugin {
     // This will re-send 'done' event after some type check error is found.
     forkTsCheckerHooks.done.tap(
       NAME,
-      (diagnostics: any[], lints: any[], _elapsed) => {
+      (diagnostics: Issue[], lints: Issue[], _elapsed) => {
         if (!this.isAsync()) return
         if (
-          diagnostics.concat(lints).some(message => message.isErrorSeverity())
+          diagnostics.concat(lints).some(message => message.severity === IssueSeverity.ERROR)
         ) {
           this.isCheckerDone = true
           this.checkerPlugin.emitCallback()
